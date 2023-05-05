@@ -29,8 +29,37 @@ def get_source_html(url):
         driver.close()
         driver.quit()
 
+def get_items_urls(file_path):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            src = file.read()
+    except FileNotFoundError:
+        return "[ERROR] File not found!"
+    except Exception as e:
+        return f"[ERROR] Failed to open file: {e}"
+
+    urls = []
+    for line in src.split('\n'):
+        href_index = line.find('href="')
+        if href_index != -1:
+            url_start = href_index + len('href="')
+            url_end = line.find('"', url_start)
+            if url_end != -1:
+                url = line[url_start:url_end]
+                urls.append(url)
+
+    try:
+        with open('items_urls.txt', 'w', encoding='utf-8') as file:
+            for url in urls:
+                file.write(f"{url}\n")
+    except Exception as e:
+        return f"[ERROR] Failed to write urls to file: {e}"
+
+    return "[INFO] URLs collected successfully!"
+
 def main():
-    get_source_html(url='https://careerspace.app/')
+    #get_source_html(url='https://careerspace.app/')
+    print(get_items_urls(file_path='ver1.html'))
 
 if __name__=="__main__":
     main()
