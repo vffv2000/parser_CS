@@ -46,7 +46,10 @@ def get_items_urls(file_path):
             url_end = line.find('"', url_start)
             if url_end != -1:
                 url = line[url_start:url_end]
-                urls.append(url)
+                if '/job/' in url:
+                    if not url.startswith('http'):
+                        url = f'https://careerspace.app{url}'
+                    urls.append(url)
 
     try:
         with open('items_urls.txt', 'w', encoding='utf-8') as file:
@@ -57,9 +60,84 @@ def get_items_urls(file_path):
 
     return "[INFO] URLs collected successfully!"
 
+def get_data(file_path):
+    with open(file_path) as file:
+        urls_list = [url.strip() for url in file.readlines()]
+        print(urls_list)
+        for url in urls_list:
+            response = requests.get(url=url)
+            soup = BeautifulSoup(response.text, "lxml")
+
+            try:
+                title = soup.find("title").text.strip()
+            except Exception as _ex:
+                title = None
+
+            try:
+                vacancy = soup.find("h3", class_="cs-t--title28").text.strip()
+            except Exception as _ex:
+                vacancy = None
+
+            try:
+                body = soup.find("div", class_="j-d-desc").text.strip()
+            except Exception as _ex:
+                body = None
+
+            try:
+                company = soup.find("div", class_="j-d-h__company").text.strip()
+            except Exception as _ex:
+                company = None
+
+            # try:
+            #     city = soup.find("span", class_="job-lb__tx").text.strip()
+            # except Exception as _ex:
+            #     city = None
+            #
+            # try:
+            #     job_format = soup.find("span", class_="job-lb").text.strip()
+            # except Exception as _ex:
+            #     job_format = None
+
+            try:
+                salary = soup.find("span", class_="price").text.strip()
+            except Exception as _ex:
+                salary = None
+
+
+
+
+
+
+
+
+
+
+
+            results_dict = {
+                'chat_name': 'https://careerspace.app/',
+                'title': title,
+                'body': body,
+                'vacancy': vacancy,
+                'vacancy_url': url,
+                'company': company,
+                'company_link': '',
+                # 'english': english,
+                # 'relocation': relocation,
+                #'job_type': job_format,    ?
+                #'city': city,    ?
+                'salary': salary,
+                # 'experience': '',
+                'time_of_public': None,
+                'contacts': None,
+                # 'session': self.current_session
+            }
+            print(results_dict)
+            break
+
 def main():
     #get_source_html(url='https://careerspace.app/')
-    print(get_items_urls(file_path='ver1.html'))
+    #print(get_items_urls(file_path='ver1.html'))
+    get_data(file_path='items_urls.txt')
 
 if __name__=="__main__":
     main()
