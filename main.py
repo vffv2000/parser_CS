@@ -129,14 +129,14 @@ def get_data(file_path):
                 'vacancy_url': url,
                 'company': company,
                 'company_link': '',
-                'english': None,
-                'relocation': None,
+                'english': '',
+                'relocation': '',
                 'job_type': job_format,
                 'city': city,
                 'salary': salary,
                 'experience': '',
-                'time_of_public': None,
-                'contacts': None,
+                'time_of_public': '',
+                'contacts': '',
                 # 'session': self.current_session
             }
             print(results_dict)
