@@ -1,9 +1,9 @@
 import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.chrome.service import Service
 import time
+
 
 def get_source_html(url):
     service = Service('chromedriver/chromedriver.exe')
@@ -28,6 +28,7 @@ def get_source_html(url):
     finally:
         driver.close()
         driver.quit()
+
 
 def get_items_urls(file_path):
     try:
@@ -60,6 +61,7 @@ def get_items_urls(file_path):
 
     return "[INFO] URLs collected successfully!"
 
+
 def get_data(file_path):
     with open(file_path) as file:
         urls_list = [url.strip() for url in file.readlines()]
@@ -70,48 +72,54 @@ def get_data(file_path):
 
             try:
                 title = soup.find("title").text.strip()
-            except Exception as _ex:
+            except (AttributeError, TypeError) as ex:
                 title = None
+                print(f"Exception occurred: {ex}")
 
             try:
                 vacancy = soup.find("h3", class_="cs-t--title28").text.strip()
-            except Exception as _ex:
+            except AttributeError as ex:
                 vacancy = None
+                print(f"Exception occurred: {ex}")
 
             try:
                 body = soup.find("div", class_="j-d-desc").text.strip()
-            except Exception as _ex:
+            except AttributeError as ex:
                 body = None
+                print(f"Exception occurred: {ex}")
 
             try:
                 company = soup.find("div", class_="j-d-h__company").text.strip()
-            except Exception as _ex:
+            except AttributeError as ex:
                 company = None
+                print(f"Exception occurred: {ex}")
 
-            # try:
-            #     city = soup.find("span", class_="job-lb__tx").text.strip()
-            # except Exception as _ex:
-            #     city = None
-            #
-            # try:
-            #     job_format = soup.find("span", class_="job-lb").text.strip()
-            # except Exception as _ex:
-            #     job_format = None
+            try:
+
+                job_info = []
+                city_span = soup.find_all('span', class_='job-lb__tx')
+
+                for span in city_span:
+                    job_info.append(span.get_text(strip=True))
+
+                city = []
+                job_format = []
+                for i in range(len(job_info)):
+                    if job_info[i] == "Удаленно" or job_info[i] == "Гибрид":
+                        job_format.append(job_info[i])
+                    else:
+                        city.append(job_info[i])
+
+            except AttributeError as ex:
+                job_format = None
+                city = None
+                print(f"AttributeError occurred: {ex}")
 
             try:
                 salary = soup.find("span", class_="price").text.strip()
-            except Exception as _ex:
+            except AttributeError as ex:
                 salary = None
-
-
-
-
-
-
-
-
-
-
+                print(f"AttributeError occurred: {ex}")
 
             results_dict = {
                 'chat_name': 'https://careerspace.app/',
@@ -121,23 +129,24 @@ def get_data(file_path):
                 'vacancy_url': url,
                 'company': company,
                 'company_link': '',
-                # 'english': english,
-                # 'relocation': relocation,
-                #'job_type': job_format,    ?
-                #'city': city,    ?
+                'english': None,
+                'relocation': None,
+                'job_type': job_format,
+                'city': city,
                 'salary': salary,
-                # 'experience': '',
+                'experience': '',
                 'time_of_public': None,
                 'contacts': None,
                 # 'session': self.current_session
             }
             print(results_dict)
-            break
+
 
 def main():
-    #get_source_html(url='https://careerspace.app/')
-    #print(get_items_urls(file_path='ver1.html'))
+    get_source_html(url='https://careerspace.app/')
+    print(get_items_urls(file_path='ver1.html'))
     get_data(file_path='items_urls.txt')
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     main()
